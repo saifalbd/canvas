@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body{
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            background-color:palegoldenrod;
+        }
+    </style>
+</head>
+<body>
+<div id="demo"></div>
+<canvas id="myCanvas" style="border:1px solid red;">
+    Your browser does not support the HTML5 canvas tag.</canvas>
+<script src="colors.js"></script>
+<script src="logic.js"></script>
+<script>
+    const base = new canvasBaseInfo();
+    class Circle {
+        constructor(){
+            this.ctx = base.ctx;
+            this.parentHeight = base.info.clientHeight;
+            this.parentWidth = base.info.clientWidth;
+            this.colors = base.info.colors;
+            this.radiusIs = base.constructor.randomInt(20,30);
+            this.color = base.randomColor;
+            this.centerTopIs = 0;
+            this.centerLeftIs = 0;
+            this.speedX =10;
+            this.speedY =10;
+            //requestAnimationFrame(this.makeCircle.bind(this));
+        }
+        axisSet(maxis){
+            let min = this.radiusIs;
+            let max = maxis-min;
+            return {min,max};
+        }
+        canTouchTop(val){
+            return this.radiusIs >val;
+        }
+        canTouchBottom(val){
+            let yFull = this.parentHeight-this.radiusIs;
+            return yFull<val;
+        }
+        canTouchLeft(val){
+            return this.radiusIs >val;
+        }
+        canTouchRight(val){
+            let xFull = (this.parentWidth-this.radiusIs);
+            //console.log(val)
+            return xFull<val;
+        }
+        get canXinTouchBorder(){
+            if (this.canTouchRight(this.centerLeftIs)||this.canTouchLeft(this.centerLeftIs)) {
+                return true
+            }
+        }
+        get canYinTouchBorder(){
+            if (this.canTouchTop(this.centerTopIs)||this.canTouchBottom(this.centerTopIs)) {
+                return true;
+            }
+        }
+        randomCenterTop(){
+            let minMax = this.axisSet(this.parentHeight);
+            this.centerTopIs= base.constructor.randomInt(minMax.min,minMax.max);
+            return this;
+        }
+        randomCenterLeft(){
+            let minMax = this.axisSet(this.parentWidth);
+            this.centerLeftIs=base.constructor.randomInt(minMax.min,minMax.max)
+            return this;
+        }
+        get speedXForwardVal(){
+            return  this.centerLeftIs+this.speedX;
+        }
+        get speedYForwardVal(){
+            return  this.centerTopIs+this.speedY;
+        }
+        speedXReverse(){this.speedX =-this.speedX;}
+        speedYReverse(){this.speedY =-this.speedY;}
+        set radius(number){
+            this.radiusIs = number;
+        }
+        set axisX(axis){
+            this.centerLeftIs= axis;
+        }
+        get axisX(){
+            return this.centerLeftIs;
+        }
+        set axisY(axis){
+            this.centerTopIs= axis;
+        }
+        get axisY(){
+            return this.centerTopIs;
+        }
+        static reverseForward(self){
+            if (self.canXinTouchBorder) {
+                self.speedXReverse();
+            }
+            if (self.canYinTouchBorder) {
+                self.speedYReverse()
+            }
+            self.axisX =self.speedXForwardVal;
+            self.axisY = self.speedYForwardVal;
+        }
+        run(){
+            this.randomCenterTop()
+            this.randomCenterLeft()
+            this.animation()
+            const  self = this;
+        }
+        animation(){
+            const  self =this;
+            //console.log(self);
+            window.requestAnimationFrame(()=>{self.animation();});
+            const  ctx = self.ctx;
+            var color =  self.color;
+            // ctx.clearRect(0,0,self.parentWidth,self.parentHeight)
+            ctx.beginPath();
+            ctx.arc(self.centerLeftIs,self.centerTopIs,self.radiusIs,0,2*Math.PI,true);
+            ctx.fillStyle = base.randomColor;
+            ctx.fill();
+            self.constructor.reverseForward(self);
+        }
+    }
+    window.onload=function () {
+        (new Circle()).run();
+    }
+</script>
+</body>
+</html>
